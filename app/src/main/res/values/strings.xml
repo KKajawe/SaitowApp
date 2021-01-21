@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">SaitowApp</string>
+    <string name="userName">UserName</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+<!--    <string name="UserName">SaitowApp</string>-->
+</resources>
