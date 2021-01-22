@@ -1,12 +1,18 @@
 package com.example.saitowapp.viewModel
 
 import android.content.Context
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
 import androidx.lifecycle.viewModelScope
+import androidx.paging.DataSource
+import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagedList
+import com.example.saitowapp.model.DataOrders
 import com.example.saitowapp.model.Data_Prefernce
 import com.example.saitowapp.repository.DataPrefernceRepository
 import com.example.saitowapp.repository.LoginRepository
+import com.example.saitowapp.repository.OrderDataSource
 import com.example.saitowapp.utility.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -15,6 +21,16 @@ import kotlinx.coroutines.runBlocking
 
 class MainActivityViewModel(val applicationContext: Context, val loginRepo: LoginRepository) :
     ViewModel() {
+    private var ordersLiveData: LiveData<PagedList<DataOrders>>
+
+    init {
+        val config = PagedList.Config.Builder()
+            .setPageSize(10)
+            .setEnablePlaceholders(false)
+            .build()
+        ordersLiveData = initializedPagedListBuilder(config).build()
+    }
+
     fun getLoginDetail(username: String, password: String) = liveData(Dispatchers.IO) {
         emit(Resource.loading(data = null))
         try {
@@ -45,4 +61,17 @@ class MainActivityViewModel(val applicationContext: Context, val loginRepo: Logi
         }
         return loginData
     }
+
+    private fun initializedPagedListBuilder(config: PagedList.Config):
+            LivePagedListBuilder<Int, DataOrders> {
+
+        val dataSourceFactory = object : DataSource.Factory<Int, DataOrders>() {
+            override fun create(): DataSource<Int, DataOrders> {
+                return OrderDataSource(Dispatchers.IO)
+            }
+        }
+        return LivePagedListBuilder(dataSourceFactory, config)
+    }
+
+    fun getOrderList(): LiveData<PagedList<DataOrders>> = ordersLiveData
 }

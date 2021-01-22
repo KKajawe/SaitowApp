@@ -4,6 +4,10 @@
     <string name="password">Password</string>
     <string name="login">Login</string>
     <string name="btn_logout">LogOut</string>
-
-
+    <string name="order_id"> Order Id :</string>
+    <string name="op_price">Operator Price</string>
+    <string name="with_tax">With Tax(Gross)</string>
+    <string name="without_tax">Without Tax(Net)</string>
+    <string name="payment_method">Payment Method : </string>
+    <string name="date">Date :</string>
 </resources>
