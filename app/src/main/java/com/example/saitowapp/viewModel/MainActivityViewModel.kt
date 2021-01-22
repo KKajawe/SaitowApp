@@ -22,6 +22,9 @@ import kotlinx.coroutines.runBlocking
 class MainActivityViewModel(val applicationContext: Context, val loginRepo: LoginRepository) :
     ViewModel() {
     private var ordersLiveData: LiveData<PagedList<DataOrders>>
+    private var sortAscOrdersLiveData: LiveData<PagedList<DataOrders>>
+    private var sortDscOrdersLiveData: LiveData<PagedList<DataOrders>>
+    var sortParam: String = ""
 
     init {
         val config = PagedList.Config.Builder()
@@ -29,6 +32,8 @@ class MainActivityViewModel(val applicationContext: Context, val loginRepo: Logi
             .setEnablePlaceholders(false)
             .build()
         ordersLiveData = initializedPagedListBuilder(config).build()
+        sortAscOrdersLiveData = initializedPagedListBuilder(config).build()
+        sortDscOrdersLiveData = initializedPagedListBuilder(config).build()
     }
 
     fun getLoginDetail(username: String, password: String) = liveData(Dispatchers.IO) {
@@ -67,11 +72,23 @@ class MainActivityViewModel(val applicationContext: Context, val loginRepo: Logi
 
         val dataSourceFactory = object : DataSource.Factory<Int, DataOrders>() {
             override fun create(): DataSource<Int, DataOrders> {
-                return OrderDataSource(Dispatchers.IO)
+                return OrderDataSource(Dispatchers.IO, sortParam)
             }
         }
         return LivePagedListBuilder(dataSourceFactory, config)
     }
 
-    fun getOrderList(): LiveData<PagedList<DataOrders>> = ordersLiveData
+    fun getOrderList(): LiveData<PagedList<DataOrders>> {
+        when (sortParam) {
+            "+created_at" -> {
+                return sortAscOrdersLiveData
+            }
+            "-created_at" -> {
+                return sortDscOrdersLiveData
+            }
+            else -> {
+                return ordersLiveData
+            }
+        }
+    }
 }
