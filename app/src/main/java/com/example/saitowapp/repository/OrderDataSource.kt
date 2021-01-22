@@ -14,7 +14,7 @@ import retrofit2.Response
 import kotlin.coroutines.CoroutineContext
 
 
-class OrderDataSource(coroutineContext: CoroutineContext) : ItemKeyedDataSource<Int, DataOrders>() {
+class OrderDataSource(coroutineContext: CoroutineContext, val sort:String) : ItemKeyedDataSource<Int, DataOrders>() {
     private val job = Job()
     private val scope = CoroutineScope(coroutineContext + job)
     private val apiService = RetrofitBuilder.getRetrofit().create(ApiService::class.java)
@@ -25,7 +25,7 @@ class OrderDataSource(coroutineContext: CoroutineContext) : ItemKeyedDataSource<
     override fun loadInitial(params: LoadInitialParams<Int>, callback: LoadInitialCallback<DataOrders>) {
         scope.launch {
             try {
-                val response: Response<Orders> = apiService.getOrders(0, params.requestedLoadSize)
+                val response: Response<Orders> = apiService.getOrders(0, params.requestedLoadSize,sort)
                 when {
                     response.isSuccessful -> {
                         val ordersList = response.body() as Orders
@@ -49,7 +49,7 @@ class OrderDataSource(coroutineContext: CoroutineContext) : ItemKeyedDataSource<
     override fun loadAfter(params: LoadParams<Int>, callback: LoadCallback<DataOrders>) {
         scope.launch {
             try {
-                val response: Response<Orders> = apiService.getOrders(params.key - 1, params.requestedLoadSize)
+                val response: Response<Orders> = apiService.getOrders(params.key - 1, params.requestedLoadSize,sort)
                 when {
                     response.isSuccessful -> {
                         val ordersList = response.body() as Orders
