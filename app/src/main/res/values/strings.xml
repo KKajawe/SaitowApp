@@ -3,5 +3,7 @@
     <string name="userName">UserName</string>
     <string name="password">Password</string>
     <string name="login">Login</string>
-<!--    <string name="UserName">SaitowApp</string>-->
+    <string name="btn_logout">LogOut</string>
+
+
 </resources>
