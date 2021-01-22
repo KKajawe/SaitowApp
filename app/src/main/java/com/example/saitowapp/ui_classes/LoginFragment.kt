@@ -42,9 +42,18 @@ class LoginFragment : Fragment() {
                 when (resource.status) {
                     Status.SUCCESS -> {
                         progress_bar.visibility = View.GONE
-                        if (resource.data?.code() == 200)
-                            Toast.makeText(activity, "Login Successful!!", Toast.LENGTH_LONG).show()
-                        else
+                        if (resource.data?.code() == 200) {
+                            fragViewModel.saveData(
+                                resource.data.body()?.data?.expireAt!!,
+                                resource.data.body()?.data?.token!!,
+                                true
+                            )
+                            val fragmanger = activity?.supportFragmentManager
+                            val fragTransaction = fragmanger?.beginTransaction()
+                            fragTransaction?.replace(R.id.container, OrdersFragment())
+                            fragTransaction?.commit()
+
+                        } else
                             Toast.makeText(activity, "Login Unsuccessful!!", Toast.LENGTH_LONG)
                                 .show()
                     }
