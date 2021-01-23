@@ -3,8 +3,6 @@ package com.example.saitowapp.ui_classes
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.app.TimePickerDialog
-import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -14,9 +12,10 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import com.example.saitowapp.R
 import com.example.saitowapp.viewModel.MainActivityViewModel
+import kotlinx.android.synthetic.main.custom_dialog.*
 import java.util.*
 
-class Custom_Dialog : AppCompatDialogFragment() ,View.OnClickListener {
+class Custom_Dialog : AppCompatDialogFragment(), View.OnClickListener {
     private lateinit var filterListener: View.OnClickListener
     private lateinit var btn_cancel: Button
     private lateinit var btn_filter: Button
@@ -44,29 +43,30 @@ class Custom_Dialog : AppCompatDialogFragment() ,View.OnClickListener {
         return builder.create()
     }
 
-    fun showDialogWithAction(okListener: View.OnClickListener?,fragManager:FragmentManager) {
-       filterListener = okListener!!
+    fun showDialogWithAction(okListener: View.OnClickListener?, fragManager: FragmentManager) {
+        if (okListener != null) {
+            filterListener = okListener
+        }
         this.show(fragManager, "custom dialog")
     }
 
 
-
     override fun onClick(v: View?) {
         when (v) {
-            btn_cancel->{
+            btn_cancel -> {
                 dismiss()
             }
             btn_startDate -> {
-                getDate_TimePicker(edtTxt_startDate,true)
+                getDate_TimePicker(edtTxt_startDate, true)
             }
             btn_endDate -> {
-                getDate_TimePicker(edtTxt_endDate,false)
+                getDate_TimePicker(edtTxt_endDate, false)
             }
 
         }
     }
 
-    private fun getDate_TimePicker( edtTxt : EditText,isStartTime:Boolean){
+    private fun getDate_TimePicker(edtTxt: EditText, isStartTime: Boolean) {
         var startTime = ""
         val c: Calendar = Calendar.getInstance()
         var mYear = c.get(Calendar.YEAR)
@@ -90,7 +90,7 @@ class Custom_Dialog : AppCompatDialogFragment() ,View.OnClickListener {
                                 dayOfMonth.toString(),
                                 (monthOfYear + 1),
                                 year,
-                                startTime,isStartTime
+                                startTime, isStartTime
                             )
                         )
                     }, mHour,
@@ -104,9 +104,16 @@ class Custom_Dialog : AppCompatDialogFragment() ,View.OnClickListener {
         )
         datePickerDialog.show()
     }
-    private fun getDateTimeString(day: String, month: Int, year: Int, startTime: String,isStartTime: Boolean): String {
-        var stringTime = ( year.toString() + "-" + month.toString() + "-" + day + " " + startTime)
-        if(isStartTime)
+
+    private fun getDateTimeString(
+        day: String,
+        month: Int,
+        year: Int,
+        startTime: String,
+        isStartTime: Boolean
+    ): String {
+        var stringTime = (year.toString() + "-" + month.toString() + "-" + day + " " + startTime)
+        if (isStartTime)
             viewModel.filterStartTime = stringTime
         else
             viewModel.filterEndTime = stringTime
