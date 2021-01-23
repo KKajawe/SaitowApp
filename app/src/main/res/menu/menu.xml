@@ -2,8 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/menu_filter"
+        android:title="@string/btn_filter"
+        app:showAsAction="always"
+        android:icon="@drawable/filter_icon"/>
+    <item
         android:id="@+id/menu_sort"
-        android:title="@string/btn_logout"
+        android:title="@string/btn_sort"
         app:showAsAction="always"
         android:icon="@drawable/sort_ascending"/>
     <item

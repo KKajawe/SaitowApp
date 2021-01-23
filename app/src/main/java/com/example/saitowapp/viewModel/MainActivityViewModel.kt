@@ -18,13 +18,19 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import timber.log.Timber
 
 class MainActivityViewModel(val applicationContext: Context, val loginRepo: LoginRepository) :
     ViewModel() {
     private var ordersLiveData: LiveData<PagedList<DataOrders>>
     private var sortAscOrdersLiveData: LiveData<PagedList<DataOrders>>
     private var sortDscOrdersLiveData: LiveData<PagedList<DataOrders>>
+    private var filterOrdersLiveData: LiveData<PagedList<DataOrders>>
+
     var sortParam: String = ""
+    var filterStartTime: String = ""
+    var filterEndTime :String=""
+    var isFilter :Boolean = false
 
     init {
         val config = PagedList.Config.Builder()
@@ -34,6 +40,7 @@ class MainActivityViewModel(val applicationContext: Context, val loginRepo: Logi
         ordersLiveData = initializedPagedListBuilder(config).build()
         sortAscOrdersLiveData = initializedPagedListBuilder(config).build()
         sortDscOrdersLiveData = initializedPagedListBuilder(config).build()
+        filterOrdersLiveData = initializedPagedListBuilder(config).build()
     }
 
     fun getLoginDetail(username: String, password: String) = liveData(Dispatchers.IO) {
@@ -41,6 +48,7 @@ class MainActivityViewModel(val applicationContext: Context, val loginRepo: Logi
         try {
             emit(Resource.success(data = loginRepo.getLoginDetail(username, password)))
         } catch (exception: Exception) {
+            Timber.e(exception.message ?: "Error Occurred!")
             emit(Resource.error(data = null, message = exception.message ?: "Error Occurred!"))
         }
     }
@@ -62,6 +70,7 @@ class MainActivityViewModel(val applicationContext: Context, val loginRepo: Logi
                 loginData = DataPrefernceRepository(applicationContext).getLoginData.first()
             } catch (e: Exception) {
                 loginData = Data_Prefernce(-1, "", false)
+                Timber.e(e.message ?: "Error Occurred!")
             }
         }
         return loginData
@@ -72,7 +81,8 @@ class MainActivityViewModel(val applicationContext: Context, val loginRepo: Logi
 
         val dataSourceFactory = object : DataSource.Factory<Int, DataOrders>() {
             override fun create(): DataSource<Int, DataOrders> {
-                return OrderDataSource(Dispatchers.IO, sortParam)
+                var token: String = getPreferenceData().token
+                return OrderDataSource(Dispatchers.IO, sortParam,token)
             }
         }
         return LivePagedListBuilder(dataSourceFactory, config)
@@ -91,4 +101,26 @@ class MainActivityViewModel(val applicationContext: Context, val loginRepo: Logi
             }
         }
     }
+
+    fun getFilterList() = liveData(Dispatchers.IO) {
+        emit(Resource.loading(data = null))
+        try {
+            emit(Resource.success(data = loginRepo.getfilterOrderList(getPreferenceData().token,getFilterParam(),sortParam)))
+        } catch (exception: Exception) {
+            Timber.e(exception.message ?: "Error Occurred!")
+            emit(Resource.error(data = null, message = exception.message ?: "Error Occurred!"))
+        }
+    }
+    private fun getFilterParam(): String{
+        var filterStr = ""
+        if (filterStartTime.equals(""))
+            filterStr = "lt;" + filterEndTime
+        else if (filterEndTime.equals(""))
+            filterStr = "gt;" + filterStartTime
+        else
+            filterStr = "gt;" + filterStartTime + "&filter[created_at]=lt;" + filterEndTime
+        return filterStr
+    }
+
+
 }
