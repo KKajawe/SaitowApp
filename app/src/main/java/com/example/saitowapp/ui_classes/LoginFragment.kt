@@ -1,10 +1,12 @@
 package com.example.saitowapp.ui_classes
 
+import android.content.Context.INPUT_METHOD_SERVICE
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -12,6 +14,7 @@ import com.example.saitowapp.R
 import com.example.saitowapp.utility.Status
 import com.example.saitowapp.viewModel.MainActivityViewModel
 import kotlinx.android.synthetic.main.frag_login.*
+import timber.log.Timber
 
 class LoginFragment : Fragment() {
     private val fragViewModel by activityViewModels<MainActivityViewModel>()
@@ -25,6 +28,12 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         btn_login.setOnClickListener {
+            val inputMethodManager = activity?.getSystemService(
+                INPUT_METHOD_SERVICE
+            ) as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(
+                activity?.currentFocus!!.windowToken, 0
+            )
             if (checkInput(edt_username.text.toString(), edt_password.text.toString())) {
                 setUpObserver(edt_username.text.toString(), edt_password.text.toString())
             } else {
@@ -48,10 +57,7 @@ class LoginFragment : Fragment() {
                                 resource.data.body()?.data?.token!!,
                                 true
                             )
-                            val fragmanger = activity?.supportFragmentManager
-                            val fragTransaction = fragmanger?.beginTransaction()
-                            fragTransaction?.replace(R.id.container, OrdersFragment())
-                            fragTransaction?.commit()
+                            MainActivity().onChangeNavigation(activity?.supportFragmentManager!!,OrdersFragment())
 
                         } else
                             Toast.makeText(activity, "Login Unsuccessful!!", Toast.LENGTH_LONG)
@@ -59,7 +65,7 @@ class LoginFragment : Fragment() {
                     }
                     Status.ERROR -> {
                         progress_bar.visibility = View.GONE
-                        Log.d("abc", resource.message.toString())
+                        Timber.e(resource.message.toString() ?: "Error Occurred!")
                         Toast.makeText(activity, "Error: Login Unsuccessful!!", Toast.LENGTH_LONG)
                             .show()
                     }
