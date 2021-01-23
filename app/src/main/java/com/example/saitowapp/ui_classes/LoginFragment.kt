@@ -9,32 +9,46 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.example.saitowapp.R
+import com.example.saitowapp.databinding.FragLoginBinding
 import com.example.saitowapp.utility.Status
 import com.example.saitowapp.viewModel.MainActivityViewModel
-import kotlinx.android.synthetic.main.frag_login.*
 import timber.log.Timber
 
 class LoginFragment : Fragment() {
     private val fragViewModel by activityViewModels<MainActivityViewModel>()
+    private var _binding: FragLoginBinding? = null
 
+    // This property is only valid between onCreateView and
+// onDestroyView.
+    private val binding get() = _binding!!
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.frag_login, container, false)
+    ): View? {
+        _binding = FragLoginBinding.inflate(inflater, container, false)
+        val view = binding.root
+        return view
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        btn_login.setOnClickListener {
+        binding.btnLogin.setOnClickListener {
             val inputMethodManager = activity?.getSystemService(
                 INPUT_METHOD_SERVICE
             ) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(
                 activity?.currentFocus?.windowToken, 0
             )
-            if (checkInput(edt_username.text.toString(), edt_password.text.toString())) {
-                setUpObserver(edt_username.text.toString(), edt_password.text.toString())
+            if (checkInput(
+                    binding.edtUsername.text.toString(),
+                    binding.edtPassword.text.toString()
+                )
+            ) {
+                setUpObserver(
+                    binding.edtUsername.text.toString(),
+                    binding.edtPassword.text.toString()
+                )
             } else {
                 Toast.makeText(activity, "Please Enter Valid Input!!", Toast.LENGTH_LONG).show()
             }
@@ -49,7 +63,7 @@ class LoginFragment : Fragment() {
             it?.let { resource ->
                 when (resource.status) {
                     Status.SUCCESS -> {
-                        progress_bar.visibility = View.GONE
+                        binding.progressBar.visibility = View.GONE
                         if (resource.data?.code() == 200) {
                             resource.data.body()?.data?.expireAt?.let { it1 ->
                                 resource.data.body()?.data?.token?.let { it2 ->
@@ -71,16 +85,21 @@ class LoginFragment : Fragment() {
                                 .show()
                     }
                     Status.ERROR -> {
-                        progress_bar.visibility = View.GONE
+                        binding.progressBar.visibility = View.GONE
                         Timber.e(resource.message.toString() ?: "Error Occurred!")
                         Toast.makeText(activity, "Error: Login Unsuccessful!!", Toast.LENGTH_LONG)
                             .show()
                     }
                     Status.LOADING -> {
-                        progress_bar.visibility = View.VISIBLE
+                        binding.progressBar.visibility = View.VISIBLE
                     }
                 }
             }
         })
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
