@@ -14,12 +14,14 @@ import androidx.paging.PagedList
 import com.example.saitowapp.R
 import com.example.saitowapp.adapter.OrderFilterListAdapter
 import com.example.saitowapp.adapter.OrderListAdapter
+import com.example.saitowapp.databinding.FragOrderlistBinding
 import com.example.saitowapp.model.DataOrders
 import com.example.saitowapp.utility.Status
 import com.example.saitowapp.viewModel.MainActivityViewModel
-import kotlinx.android.synthetic.main.frag_orderlist.*
 
 class OrdersFragment : Fragment() {
+    private var _binding: FragOrderlistBinding? = null
+    private val binding get() = _binding!!
     var adapterOrder: OrderListAdapter = OrderListAdapter()
     private lateinit var adapterOrdersFilter: OrderFilterListAdapter
     private val viewModel by activityViewModels<MainActivityViewModel>()
@@ -32,18 +34,22 @@ class OrdersFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.frag_orderlist, container, false)
+    ): View? {
+        _binding = FragOrderlistBinding.inflate(inflater, container, false)
+        val view = binding.root
+        return view
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mprogress_bar.visibility=View.VISIBLE
+        binding.mprogressBar.visibility = View.VISIBLE
         observeLiveData()
     }
 
     private fun observeLiveData() {
         viewModel.getOrderList().observe(viewLifecycleOwner, orderListObserver)
-        orders_list_view.adapter = adapterOrder
-        mprogress_bar.visibility=View.GONE
+        binding.ordersListView.adapter = adapterOrder
+        binding.mprogressBar.visibility = View.GONE
 
     }
 
@@ -52,7 +58,12 @@ class OrdersFragment : Fragment() {
         when (item.itemId) {
             R.id.menu_logout -> {
                 viewModel.saveData(-1, "", false)
-                activity?.supportFragmentManager?.let { MainActivity().onChangeNavigation(it,LoginFragment()) }
+                activity?.supportFragmentManager?.let {
+                    MainActivity().onChangeNavigation(
+                        it,
+                        LoginFragment()
+                    )
+                }
                 return true
             }
             R.id.menu_sort -> {
@@ -122,25 +133,29 @@ class OrdersFragment : Fragment() {
             it?.let { resource ->
                 when (resource.status) {
                     Status.SUCCESS -> {
-                        mprogress_bar.visibility=View.GONE
-                        resource.data?.body()?.let{
-                          it ->  adapterOrdersFilter = OrderFilterListAdapter(it)
-                            orders_list_view.adapter = adapterOrdersFilter
+                        binding.mprogressBar.visibility = View.GONE
+                        resource.data?.body()?.let { it ->
+                            adapterOrdersFilter = OrderFilterListAdapter(it)
+                            binding.ordersListView.adapter = adapterOrdersFilter
                         }
                     }
                     Status.ERROR -> {
-                        mprogress_bar.visibility=View.GONE
+                        binding.mprogressBar.visibility = View.GONE
                         Toast.makeText(context, "Unable to load filter Data!!", Toast.LENGTH_LONG)
                             .show()
                     }
                     Status.LOADING -> {
-                        mprogress_bar.visibility=View.VISIBLE
+                        binding.mprogressBar.visibility = View.VISIBLE
                     }
                 }
             }
         })
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 
 }
 

@@ -5,41 +5,30 @@ import android.app.Dialog
 import android.app.TimePickerDialog
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
-import com.example.saitowapp.R
+import com.example.saitowapp.databinding.CustomDialogBinding
 import com.example.saitowapp.viewModel.MainActivityViewModel
-import kotlinx.android.synthetic.main.custom_dialog.*
 import java.util.*
 
 class Custom_Dialog : AppCompatDialogFragment(), View.OnClickListener {
+
+    private lateinit var binding: CustomDialogBinding
     private lateinit var filterListener: View.OnClickListener
-    private lateinit var btn_cancel: Button
-    private lateinit var btn_filter: Button
-    private lateinit var btn_startDate: Button
-    private lateinit var btn_endDate: Button
-    private lateinit var edtTxt_startDate: EditText
-    private lateinit var edtTxt_endDate: EditText
     private val viewModel by activityViewModels<MainActivityViewModel>()
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder: android.app.AlertDialog.Builder = android.app.AlertDialog.Builder(activity)
-        val inflater = requireActivity().layoutInflater
-        val view: View = inflater.inflate(R.layout.custom_dialog, null)
+        binding = CustomDialogBinding.inflate(layoutInflater)
+        val view = binding.root
         builder.setView(view)
 
-        btn_cancel = view.findViewById<Button>(R.id.btn_cancel)
-        btn_cancel.setOnClickListener(this)
-        btn_filter = view.findViewById<Button>(R.id.btn_filter)
-        btn_filter.setOnClickListener(filterListener as View.OnClickListener?)
-        btn_startDate = view.findViewById<Button>(R.id.btn_date)
-        btn_endDate = view.findViewById<Button>(R.id.btn_enddate)
-        btn_startDate.setOnClickListener(this)
-        btn_endDate.setOnClickListener(this)
-        edtTxt_startDate = view.findViewById<EditText>(R.id.edt_startDate)
-        edtTxt_endDate = view.findViewById<EditText>(R.id.edt_endDate)
+        binding.btnCancel.setOnClickListener(this)
+        binding.btnFilter.setOnClickListener(filterListener as View.OnClickListener?)
+        binding.btnDate.setOnClickListener(this)
+        binding.btnEnddate.setOnClickListener(this)
         return builder.create()
     }
 
@@ -53,14 +42,14 @@ class Custom_Dialog : AppCompatDialogFragment(), View.OnClickListener {
 
     override fun onClick(v: View?) {
         when (v) {
-            btn_cancel -> {
+            binding.btnCancel -> {
                 dismiss()
             }
-            btn_startDate -> {
-                getDate_TimePicker(edtTxt_startDate, true)
+            binding.btnDate -> {
+                getDate_TimePicker(binding.edtStartDate, true)
             }
-            btn_endDate -> {
-                getDate_TimePicker(edtTxt_endDate, false)
+            binding.btnEnddate -> {
+                getDate_TimePicker(binding.edtEndDate, false)
             }
 
         }
@@ -112,7 +101,7 @@ class Custom_Dialog : AppCompatDialogFragment(), View.OnClickListener {
         startTime: String,
         isStartTime: Boolean
     ): String {
-        var stringTime = (year.toString() + "-" + month.toString() + "-" + day + " " + startTime)
+        var stringTime = ("$year-$month-$day $startTime")
         if (isStartTime)
             viewModel.filterStartTime = stringTime
         else
