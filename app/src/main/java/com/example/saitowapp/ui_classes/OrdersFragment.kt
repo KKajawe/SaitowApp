@@ -52,7 +52,7 @@ class OrdersFragment : Fragment() {
         when (item.itemId) {
             R.id.menu_logout -> {
                 viewModel.saveData(-1, "", false)
-                MainActivity().onChangeNavigation(activity?.supportFragmentManager!!,LoginFragment())
+                activity?.supportFragmentManager?.let { MainActivity().onChangeNavigation(it,LoginFragment()) }
                 return true
             }
             R.id.menu_sort -> {
@@ -93,14 +93,16 @@ class OrdersFragment : Fragment() {
                     observeLiveData()
                 } else {
                     var customDialog = Custom_Dialog()
-                    customDialog.showDialogWithAction(View.OnClickListener {
-                        viewModel.getOrderList().removeObserver(orderListObserver)
-                        setFilterObserver()
-                        customDialog.dismiss()
-                        viewModel.isFilter = true
-                        item.icon =
-                            ContextCompat.getDrawable(requireContext(), R.drawable.filtersort)
-                    }, activity?.supportFragmentManager!!)
+                    activity?.supportFragmentManager?.let {
+                        customDialog.showDialogWithAction(View.OnClickListener {
+                            viewModel.getOrderList().removeObserver(orderListObserver)
+                            setFilterObserver()
+                            customDialog.dismiss()
+                            viewModel.isFilter = true
+                            item.icon =
+                                ContextCompat.getDrawable(requireContext(), R.drawable.filtersort)
+                        }, it)
+                    }
 
                 }
 
@@ -121,8 +123,10 @@ class OrdersFragment : Fragment() {
                 when (resource.status) {
                     Status.SUCCESS -> {
                         mprogress_bar.visibility=View.GONE
-                        adapterOrdersFilter = OrderFilterListAdapter(resource.data?.body()!!)
-                        orders_list_view.adapter = adapterOrdersFilter
+                        resource.data?.body()?.let{
+                          it ->  adapterOrdersFilter = OrderFilterListAdapter(it)
+                            orders_list_view.adapter = adapterOrdersFilter
+                        }
                     }
                     Status.ERROR -> {
                         mprogress_bar.visibility=View.GONE

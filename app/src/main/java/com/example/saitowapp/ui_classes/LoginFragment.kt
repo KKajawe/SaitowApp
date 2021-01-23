@@ -2,7 +2,6 @@ package com.example.saitowapp.ui_classes
 
 import android.content.Context.INPUT_METHOD_SERVICE
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,7 +31,7 @@ class LoginFragment : Fragment() {
                 INPUT_METHOD_SERVICE
             ) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(
-                activity?.currentFocus!!.windowToken, 0
+                activity?.currentFocus?.windowToken, 0
             )
             if (checkInput(edt_username.text.toString(), edt_password.text.toString())) {
                 setUpObserver(edt_username.text.toString(), edt_password.text.toString())
@@ -52,12 +51,20 @@ class LoginFragment : Fragment() {
                     Status.SUCCESS -> {
                         progress_bar.visibility = View.GONE
                         if (resource.data?.code() == 200) {
-                            fragViewModel.saveData(
-                                resource.data.body()?.data?.expireAt!!,
-                                resource.data.body()?.data?.token!!,
-                                true
-                            )
-                            MainActivity().onChangeNavigation(activity?.supportFragmentManager!!,OrdersFragment())
+                            resource.data.body()?.data?.expireAt?.let { it1 ->
+                                resource.data.body()?.data?.token?.let { it2 ->
+                                    fragViewModel.saveData(
+                                        it1,
+                                        it2,
+                                        true
+                                    )
+                                }
+                            }
+                            activity?.supportFragmentManager?.let { it1 ->
+                                MainActivity().onChangeNavigation(
+                                    it1, OrdersFragment()
+                                )
+                            }
 
                         } else
                             Toast.makeText(activity, "Login Unsuccessful!!", Toast.LENGTH_LONG)
